@@ -35,6 +35,20 @@ def get_puzzle_input():
         return get_puzzle_input()
 
 
+# The following function checks if the puzzle is valid before solving it.
+def is_puzzle_valid(grid):
+    for row in range(9):
+        for col in range(9):
+            num = grid[row][col]
+            if num != 0:
+                grid[row][col] = 0
+                if not is_valid(grid, num, (row, col)):
+                    grid[row][col] = num  # Restore the number
+                    return False
+                grid[row][col] = num  # Restore the number
+    return True
+
+
 # The following function gets the user's input and returns it as a string.
 # If the input is not 81 characters long, the function will prompt the user to enter a new input. 
 def get_input_single_line():
@@ -187,13 +201,14 @@ def main():
         return
 
     original_grid = [row[:] for row in grid]
-
-
+    if not is_puzzle_valid(grid):
+        print("The puzzle is invalid and cannot be solved.")
+        return
     if solve_sudoku(grid, original_grid):
         print("The puzzle has been solved")
         print_grid(grid, original_grid)
     else:
-        print("The puzzle cannot be solved")
+        print("No solution exists for the given puzzle.")
     
 
 if __name__ == "__main__":
