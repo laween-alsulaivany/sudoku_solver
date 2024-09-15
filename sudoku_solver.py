@@ -138,21 +138,21 @@ def solve_sudoku(grid, original_grid=None):
             # Visualization
             os.system('cls' if os.name == 'nt' else 'clear') # Clear the console depending on OS
             print_grid(grid, original_grid, (row, col)) 
-            time.sleep(0.01) # Sleep for 0.01 seconds to create animation
+            time.sleep(0.04) # Sleep for 0.04 seconds to create animation
             if solve_sudoku(grid, original_grid):
                 return True
 
             grid[row][col] = 0
             # Visualization after backtracking
             os.system('cls' if os.name == 'nt' else 'clear')
-            print_grid(grid, original_grid, (row, col))
-            time.sleep(0.01)
+            print_grid(grid, original_grid, (row, col), backtracking=True)
+            time.sleep(0.04)
 
     return False
 
 # The following function prints the grid with the current number being tried in red,
 # the original number in white, and the number placed during solving in blue.
-def print_grid(grid, original_grid=None, current_pos=None):
+def print_grid(grid, original_grid=None, current_pos=None, backtracking=False):
     for row in range(9):
         if row % 3 == 0 and row != 0:
             print("-" * 25)
@@ -168,6 +168,9 @@ def print_grid(grid, original_grid=None, current_pos=None):
             elif current_pos and (row, col) == current_pos:
                 # Current number being tried in red
                 print(f"{RED}{num}{RESET} ", end="")
+            elif backtracking and current_pos and (row, col) == current_pos:
+                # Backtracking step in yellow
+                print(f"{YELLOW}{num}{RESET} ", end="")
             else:
                 # Numbers placed during solving in green
                 print(f"{GREEN}{num}{RESET} ", end="")
