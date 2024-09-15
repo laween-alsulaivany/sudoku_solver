@@ -76,9 +76,11 @@ def get_input_row_by_row():
 # The following function prompts the user to choose a preset puzzle. They can choose from one of three predefined puzzles.   
 def get_preset_puzzle():
     puzzles = {
-        '1': ('Easy Puzzle', '530070000600195000098000060800060003400803001700020006060000280000419005000080079'),
-        '2': ('Medium Puzzle', '006002100900600048070800009300020060000703000040050003200009030810006002007100400'),
-        '3': ('Hard Puzzle', '000000907000420180000705026100904000050000040000507009920108000034059000507000000')
+
+        '1': ('Very Easy Puzzle', '000000000000000000000000000000000000000000000000000000000000000000000000000000000'),
+        '2': ('Easy Puzzle', '530070000600195000098000060800060003400803001700020006060000280000419005000080079'),
+        '3': ('Medium Puzzle', '006002100900600048070800009300020060000703000040050003200009030810006002007100400'),
+        '4': ('Hard Puzzle', '000000907000420180000705026100904000050000040000507009920108000034059000507000000')
     }
 
     print("Select a preset puzzle:")
@@ -138,35 +140,44 @@ def is_valid(grid,num,pos):
 
 # The following function solves the Sudoku puzzle by backtracking through the grid and checking if the puzzle is solvable.
 # If the puzzle is solvable, the function returns True. Otherwise, it returns False.
-def solve_sudoku(grid, original_grid=None):
+def solve_sudoku(grid, start_time, original_grid=None, visualization_speed=0.04):
     empty_cell = find_empty(grid)
     if not empty_cell:
         return True  # Puzzle solved
     else:
-        row, col = empty_cell # Position of empty cell
+        row, col = empty_cell  # Position of empty cell
 
     for num in range(1, 10):
         if is_valid(grid, num, (row, col)):
             grid[row][col] = num
 
             # Visualization
-            os.system('cls' if os.name == 'nt' else 'clear') # Clear the console depending on OS
-            print_grid(grid, original_grid, (row, col)) 
-            time.sleep(0.04) # Sleep for 0.04 seconds to create animation
-            if solve_sudoku(grid, original_grid):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            elapsed_time = time.time() - start_time
+            print_grid(grid, original_grid, (row, col), elapsed_time=elapsed_time)
+            time.sleep(visualization_speed)
+
+            if solve_sudoku(grid, start_time, original_grid, visualization_speed):
                 return True
 
             grid[row][col] = 0
+
             # Visualization after backtracking
             os.system('cls' if os.name == 'nt' else 'clear')
-            print_grid(grid, original_grid, (row, col), backtracking=True)
-            time.sleep(0.04)
+            elapsed_time = time.time() - start_time
+            print_grid(grid, original_grid, (row, col), backtracking=True, elapsed_time=elapsed_time)
+            time.sleep(visualization_speed)
 
     return False
 
+
+
 # The following function prints the grid with the current number being tried in red,
 # the original number in white, and the number placed during solving in blue.
-def print_grid(grid, original_grid=None, current_pos=None, backtracking=False):
+def print_grid(grid, original_grid=None, current_pos=None, backtracking=False, elapsed_time=None):
+    # Display elapsed time if provided
+    if elapsed_time is not None:
+        print(f"Time elapsed: {elapsed_time:.2f} seconds\n")
     for row in range(9):
         if row % 3 == 0 and row != 0:
             print("-" * 25)
@@ -180,19 +191,33 @@ def print_grid(grid, original_grid=None, current_pos=None, backtracking=False):
                 # Original number in white
                 print(f"{WHITE}{num}{RESET} ", end="")
             elif current_pos and (row, col) == current_pos:
-                # Current number being tried in red
-                print(f"{RED}{num}{RESET} ", end="")
-            elif backtracking and current_pos and (row, col) == current_pos:
-                # Backtracking step in yellow
-                print(f"{YELLOW}{num}{RESET} ", end="")
+                if backtracking:
+                    # Backtracking step in yellow
+                    print(f"{YELLOW}{num}{RESET} ", end="")
+                else:
+                    # Current number being tried in red
+                    print(f"{RED}{num}{RESET} ", end="")
             else:
                 # Numbers placed during solving in green
                 print(f"{GREEN}{num}{RESET} ", end="")
         print()
 
+def get_visualization_speed():
+    while True:
+        speed_input = input("Enter visualization speed in seconds (e.g., 0.1). Press Enter for default speed (0.04): ")
+        if speed_input == '':
+            return 0.04  # Default speed
+        try:
+            speed = float(speed_input)
+            if speed >= 0:
+                return speed
+            else:
+                print("Please enter a non-negative number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
 
 def main():
-
     puzzle_input = get_puzzle_input()
     try:
         grid = parse_puzzle(puzzle_input)
@@ -204,12 +229,19 @@ def main():
     if not is_puzzle_valid(grid):
         print("The puzzle is invalid and cannot be solved.")
         return
-    if solve_sudoku(grid, original_grid):
+
+    visualization_speed = get_visualization_speed()
+    start_time = time.time()  # Start timing
+
+    if solve_sudoku(grid, start_time, original_grid, visualization_speed):
+        end_time = time.time()  # End timing
+        total_time = end_time - start_time
         print("The puzzle has been solved")
         print_grid(grid, original_grid)
+        print(f"Time taken to solve: {total_time:.2f} seconds")
     else:
         print("No solution exists for the given puzzle.")
-    
+
 
 if __name__ == "__main__":
     main()
