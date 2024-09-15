@@ -16,15 +16,68 @@ BLUE = '\033[94m'
 WHITE = '\033[97m'
 RESET = '\033[0m'
 
+
+def get_puzzle_input():
+    print(f"Chose an input method: \n"
+    "1. Enter the puzzle as a single line.\n"
+    "2. Enter the puzzle row by row.\n"
+    "3. Choose a preset puzzle.\n")
+    input_choice = input("Enter your choice (1-3): ")
+
+    if input_choice == '1':
+        return get_input_single_line()
+    elif input_choice == '2':
+        return get_input_row_by_row()
+    elif input_choice == '3':
+        return get_preset_puzzle()
+    else:
+        print("Invalid choice. Please try again.")
+        return get_puzzle_input()
+
+
 # The following function gets the user's input and returns it as a string.
 # If the input is not 81 characters long, the function will prompt the user to enter a new input. 
-def get_puzzle_input():
+def get_input_single_line():
     user_input = input("Please enter the puzzle in a single line: (Enter '0' for an empty space)\n")
-    if len(user_input) != 81:
+    if len(user_input) != 81 or not user_input.isdigit():
         print("Invalid input. Please enter exactly 81 characters.")
-        return get_puzzle_input()
+        return get_input_single_line()
     else:
         return user_input
+
+# The following function prompts the user to enter the puzzle row by row.
+def get_input_row_by_row():
+    input_grid = []
+    print("Please enter the puzzle row by row, press Enter for next row: (Enter '0' for an empty space)\n")
+    for row in range(9):
+        while True:
+            user_input = input(f"Row {row+1}: ")
+            if len(user_input) != 9 or not user_input.isdigit():
+                print("Invalid Input. Please enter exactly 9 digits (0-9).")
+            else:
+                input_grid.append(user_input)
+                break
+    return ''.join(input_grid)
+
+# The following function prompts the user to choose a preset puzzle. They can choose from one of three predefined puzzles.   
+def get_preset_puzzle():
+    puzzles = {
+        '1': ('Easy Puzzle', '530070000600195000098000060800060003400803001700020006060000280000419005000080079'),
+        '2': ('Medium Puzzle', '006002100900600048070800009300020060000703000040050003200009030810006002007100400'),
+        '3': ('Hard Puzzle', '000000907000420180000705026100904000050000040000507009920108000034059000507000000')
+    }
+
+    print("Select a preset puzzle:")
+    for key, (name, _) in puzzles.items():
+        print(f"{key}. {name}")
+    choice = input("Enter your choice: ")
+
+    if choice in puzzles:
+        return puzzles[choice][1]
+    else:
+        print("Invalid choice. Please try again.")
+        return get_preset_puzzle()
+
 
 # The following function parses the user's input into a 9x9 grid.
 def parse_puzzle(puzzle_input):
